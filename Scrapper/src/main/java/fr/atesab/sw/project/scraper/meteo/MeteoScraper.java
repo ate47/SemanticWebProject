@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class MeteoScraper implements Scraper {
+public class MeteoScraper extends Scraper {
     public static final String METEOCIEL_PAGE = "https://www.meteociel.fr/temps-reel/obs_villes.php?code2=";
     public static final int METEOCIEL_ID_SAINT_ETIENNE = 7475;
 
@@ -21,7 +21,7 @@ public class MeteoScraper implements Scraper {
 
     @Override
     public String getName() {
-        return "meteo_html";
+        return "Meteo Ciel";
     }
 
     private static boolean passIt(Iterator<?> it, int count) {
@@ -42,7 +42,7 @@ public class MeteoScraper implements Scraper {
             var it = elements.iterator();
             if (passIt(it, 28))
                 throw new ScraperException(this, "Can't pass header td");
-            for (; it.hasNext();) {
+            while (it.hasNext()) {
                 var hour = it.next().text();
 
                 if (passIt(it, 3) || !it.hasNext())
