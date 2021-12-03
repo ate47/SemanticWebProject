@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+version '1.0'
+group   'fr.atesab.sw.project'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation group: 'org.apache.jena', name: 'apache-jena-libs', version: '3.12.0'
+}
