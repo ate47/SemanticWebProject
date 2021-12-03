@@ -52,3 +52,6 @@ hs_err_pid*
 
 # meteociel file
 meteo.html
+
+# territoire download dir
+territoire.emse.fr/
