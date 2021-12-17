@@ -28,7 +28,7 @@ public class MeteoCielLocation {
      */
     public MeteoCielLocation(int code) {
         this.code = code;
-        this.hasDate = false;
+        setToday();
     }
 
     /**
@@ -41,6 +41,24 @@ public class MeteoCielLocation {
      */
     public MeteoCielLocation(int code, int day, int month, int year) {
         this.code = code;
+        setDate(day, month, year);
+    }
+
+    /**
+     * set the date to today
+     */
+    public void setToday() {
+        this.hasDate = false;
+    }
+
+    /**
+     * set the date
+     * 
+     * @param day   between 1 and 31
+     * @param month between 1 and 12
+     * @param year  greater than 1975
+     */
+    public void setDate(int day, int month, int year) {
         this.day = ScraperUtils.interval(day, 1, 31, "day");
         this.month = ScraperUtils.interval(month, 1, 12, "month");
         this.year = ScraperUtils.intervalMin(year, 1975, "year");
