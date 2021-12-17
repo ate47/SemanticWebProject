@@ -1,6 +1,6 @@
 package fr.atesab.sw.project.scraper;
 
-public class ScraperException extends Exception {
+public class ScraperException extends RuntimeException {
     private static String getMessageOf(Scraper s) {
         return "Can't scrap with " + s.getName() + "(" + s.getUid() + ")";
     }
