@@ -13,11 +13,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MeteoScraper extends Scraper {
-    public static final String METEOCIEL_PAGE = "https://www.meteociel.fr/temps-reel/obs_villes.php?code2=";
-    public static final int METEOCIEL_ID_SAINT_ETIENNE = 7475;
+    public static final String METEOCIEL_PAGE = "https://www.meteociel.fr/temps-reel/obs_villes.php";
 
     @Getter
-    private final int cityId;
+    private final MeteoCielLocation location;
 
     @Override
     public String getName() {
@@ -36,13 +35,15 @@ public class MeteoScraper extends Scraper {
     @Override
     public void loadTriples(Model model) throws ScraperException {
         try {
-            var doc = Jsoup.connect(METEOCIEL_PAGE + getCityId()).get();
+            var doc = Jsoup.connect(METEOCIEL_PAGE + getLocation().toGetQuery()).get();
 
-            var dateDays = doc.select("select[name=jour2] option[selected]");
+            var days = Integer.valueOf(doc.select("select[name=jour2] option[selected]").first().attr("value"));
+            var month = Integer.valueOf(doc.select("select[name=mois2] option[selected]").first().attr("value")) + 1;
+            var year = Integer.valueOf(doc.select("select[name=annee2] option[selected]").first().attr("value"));
 
-            System.out.println(dateDays.first());
+            System.out.println(days + "/" + month + "/" + year);
 
-            if (dateDays != null)
+            if (days != null)
                 return;
 
             var elements = doc
