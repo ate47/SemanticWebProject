@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileWriter;
+
+import org.apache.commons.codec.Charsets;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 
@@ -33,5 +37,12 @@ public class Start {
                 // add the content of model to the triplestore
                 conneg.load(model);
             }
+        else {
+            try (var w = new FileWriter(new File("output.txt"), Charsets.UTF_8)) {
+                model.write(w, "TURTLE");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

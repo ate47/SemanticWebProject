@@ -85,4 +85,5 @@ public class MeteoCielLocation {
     public boolean hasDate() {
         return hasDate;
     }
+
 }

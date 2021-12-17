@@ -55,3 +55,6 @@ meteo.html
 
 # territoire download dir
 territoire.emse.fr/
+
+# model file output
+output.txt
