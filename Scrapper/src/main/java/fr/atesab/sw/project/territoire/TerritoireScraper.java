@@ -17,7 +17,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class Territoire extends Scraper {
+public class TerritoireScraper extends Scraper {
     public static final String TERRITOIRE_URL = "https://territoire.emse.fr/kg/";
 
     private void allFiles0(String url, List<String> files, Pattern regex) {

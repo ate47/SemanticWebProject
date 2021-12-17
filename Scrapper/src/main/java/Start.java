@@ -4,7 +4,7 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import fr.atesab.sw.project.scraper.ScraperException;
 import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
 import fr.atesab.sw.project.scraper.meteo.MeteoScraper;
-import fr.atesab.sw.project.territoire.Territoire;
+import fr.atesab.sw.project.territoire.TerritoireScraper;
 
 public class Start {
     public static final String DATASET_URL = "http://localhost:3030/dataset";
@@ -12,7 +12,7 @@ public class Start {
 
     public static void main(String[] args) {
         var mscraper = new MeteoScraper(new MeteoCielLocation(MeteoCielLocation.METEOCIEL_ID_SAINT_ETIENNE));
-        var tscraper = new Territoire(Territoire.TERRITOIRE_URL);
+        var tscraper = new TerritoireScraper(TerritoireScraper.TERRITOIRE_URL);
 
         var model = ModelFactory.createDefaultModel();
 
