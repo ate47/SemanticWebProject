@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MeteoScraper extends Scraper {
-    public static final String METEOCIEL_INDEX = "http://example.com/#Meteo/";
+    public static final String METEOCIEL_INDEX = "http://example.com/Meteo#";
     public static final String METEOCIEL_PAGE = "https://www.meteociel.fr/temps-reel/obs_villes.php";
 
     @Getter
