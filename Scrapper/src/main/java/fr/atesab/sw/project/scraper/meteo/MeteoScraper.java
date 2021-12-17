@@ -37,6 +37,14 @@ public class MeteoScraper extends Scraper {
     public void loadTriples(Model model) throws ScraperException {
         try {
             var doc = Jsoup.connect(METEOCIEL_PAGE + getCityId()).get();
+
+            var dateDays = doc.select("select[name=jour2] option[selected]");
+
+            System.out.println(dateDays.first());
+
+            if (dateDays != null)
+                return;
+
             var elements = doc
                     .select("tr td center table tr td");
             var it = elements.iterator();
