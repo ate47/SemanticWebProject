@@ -62,7 +62,8 @@ public class Territoire extends Scraper {
     public void loadTriples(Model model) throws ScraperException {
         List<String> ttls = allFiles(".*[.]ttl");
 
-        for (String ttl : ttls)
-            System.out.println(ttl);
+        for (String ttl : ttls) {
+            model.read(ttl); // read the ttl file to the graph
+        }
     }
 }
