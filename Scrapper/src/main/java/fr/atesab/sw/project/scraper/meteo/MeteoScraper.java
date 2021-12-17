@@ -49,7 +49,7 @@ public class MeteoScraper extends Scraper {
             var it = elements.iterator();
             if (passIt(it, 28))
                 throw new ScraperException(this, "Can't pass header td");
-            Property temperature = model.createProperty(MeteoScraper.METEOCIEL_INDEX + "Temperature");
+            Property temperature = model.createProperty(MeteoScraper.METEOCIEL_INDEX + "hasTemperature");
             while (it.hasNext()) {
                 String hourH = it.next().text();
                 int hourValue = Integer.parseInt(hourH.substring(0, hourH.indexOf('h')).trim());

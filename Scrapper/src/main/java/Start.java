@@ -32,6 +32,9 @@ public class Start {
             throw new RuntimeException(e);
         }
 
+        model.setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+        model.setNsPrefix("meteo", MeteoScraper.METEOCIEL_INDEX);
+
         if (SEND_DATASET)
             try (var conneg = RDFConnectionFactory.connect(DATASET_URL)) {
                 // add the content of model to the triplestore
