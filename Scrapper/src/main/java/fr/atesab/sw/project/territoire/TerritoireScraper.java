@@ -15,7 +15,7 @@ import fr.atesab.sw.project.scraper.Scraper;
 import fr.atesab.sw.project.scraper.ScraperException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
+//test
 @RequiredArgsConstructor
 public class TerritoireScraper extends Scraper {
     public static final String TERRITOIRE_URL = "https://territoire.emse.fr/kg/";
