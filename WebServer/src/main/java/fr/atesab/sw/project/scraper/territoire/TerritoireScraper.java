@@ -1,4 +1,4 @@
-package fr.atesab.sw.project.territoire;
+package fr.atesab.sw.project.scraper.territoire;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import fr.atesab.sw.project.scraper.Scraper;
 import fr.atesab.sw.project.scraper.ScraperException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
 //test
 @RequiredArgsConstructor
 public class TerritoireScraper extends Scraper {
