@@ -14,6 +14,9 @@ import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
 @RequestMapping("/api/")
 
 public class ResearchController {
+    public static record ApiEndPoint(String message) {
+    };
+
     @Autowired
     ScraperManager scraperManager;
 
@@ -24,8 +27,8 @@ public class ResearchController {
     }
 
     @GetMapping("/")
-    String home() {
-        return "api";
+    ApiEndPoint home() {
+        return new ApiEndPoint("api");
     }
 
     /*
