@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.lang.model.element.Element;
-
 import org.apache.jena.rdf.model.Model;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import fr.atesab.sw.project.scraper.Scraper;
 import fr.atesab.sw.project.scraper.ScraperException;
+import fr.atesab.sw.project.scraper.ScrapingResult;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -60,11 +59,12 @@ public class TerritoireScraper extends Scraper {
     }
 
     @Override
-    public void loadTriples(Model model) throws ScraperException {
+    public ScrapingResult loadTriples(Model model) throws ScraperException {
         List<String> ttls = allFiles(".*[.]ttl");
 
         for (String ttl : ttls) {
             model.read(ttl); // read the ttl file to the graph
         }
+        return createResult(ttls.size());
     }
 }

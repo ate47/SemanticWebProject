@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 
 import fr.atesab.sw.project.scraper.Scraper;
 import fr.atesab.sw.project.scraper.ScraperException;
+import fr.atesab.sw.project.scraper.ScrapingResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -36,8 +37,10 @@ public class MeteoScraper extends Scraper {
     }
 
     @Override
-    public void loadTriples(Model model) throws ScraperException {
+    public ScrapingResult loadTriples(Model model) throws ScraperException {
         try {
+            int triples = 0;
+
             var doc = Jsoup.connect(METEOCIEL_PAGE + getLocation().toGetQuery()).get();
 
             var days = Integer.parseInt(doc.select("select[name=jour2] option[selected]").first().attr("value"));
@@ -63,10 +66,11 @@ public class MeteoScraper extends Scraper {
 
                 MeteoCielResource res = new MeteoCielResource(getLocation().getCode(), days, month, year, hourValue);
                 model.add(res.getResourceForLocation(model), temperature, tempValue, XSDDatatype.XSDfloat);
+                triples++;
 
                 passIt(it, 7);
             }
-
+            return createResult(triples);
         } catch (IOException e) {
             throw new ScraperException(this, e);
         }

@@ -2,23 +2,18 @@ package fr.atesab.sw.project.scraper.meteo;
 
 import fr.atesab.sw.project.utils.ScraperUtils;
 import lombok.Getter;
-import lombok.Setter;
 
 public class MeteoCielLocation {
     public static final int METEOCIEL_ID_SAINT_ETIENNE = 7475;
 
     @Getter
-    @Setter
     private int code;
     private boolean hasDate;
     @Getter
-    @Setter
     private int day;
     @Getter
-    @Setter
     private int month;
     @Getter
-    @Setter
     private int year;
 
     /**
@@ -27,7 +22,7 @@ public class MeteoCielLocation {
      * @param code the code of the city
      */
     public MeteoCielLocation(int code) {
-        this.code = code;
+        setCode(code);
         setToday();
     }
 
@@ -40,15 +35,21 @@ public class MeteoCielLocation {
      * @param year  greater than 1975
      */
     public MeteoCielLocation(int code, int day, int month, int year) {
-        this.code = code;
+        setCode(code);
         setDate(day, month, year);
+    }
+
+    public MeteoCielLocation setCode(int code) {
+        this.code = code;
+        return this;
     }
 
     /**
      * set the date to today
      */
-    public void setToday() {
+    public MeteoCielLocation setToday() {
         this.hasDate = false;
+        return this;
     }
 
     /**
@@ -58,11 +59,12 @@ public class MeteoCielLocation {
      * @param month between 1 and 12
      * @param year  greater than 1975
      */
-    public void setDate(int day, int month, int year) {
+    public MeteoCielLocation setDate(int day, int month, int year) {
         this.day = ScraperUtils.interval(day, 1, 31, "day");
         this.month = ScraperUtils.interval(month, 1, 12, "month");
         this.year = ScraperUtils.intervalMin(year, 1975, "year");
         this.hasDate = true;
+        return this;
     }
 
     /**

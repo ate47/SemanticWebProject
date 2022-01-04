@@ -21,5 +21,9 @@ public abstract class Scraper {
      * 
      * @param model the triples container
      */
-    public abstract void loadTriples(Model model) throws ScraperException;
+    public abstract ScrapingResult loadTriples(Model model) throws ScraperException;
+
+    protected ScrapingResult createResult(int results) {
+        return new ScrapingResult(getName(), results);
+    }
 }
