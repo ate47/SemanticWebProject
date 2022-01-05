@@ -1,5 +1,6 @@
 package fr.atesab.sw.project.scraper;
 
+import java.net.URL;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
 import fr.atesab.sw.project.scraper.meteo.MeteoScraper;
+import fr.atesab.sw.project.scraper.territoire.DataTerritoireScraper;
 import fr.atesab.sw.project.scraper.territoire.TerritoireScraper;
 import lombok.Getter;
 
@@ -29,6 +31,10 @@ public class ScraperManager {
 
     public MeteoScraper getMeteoScraper(MeteoCielLocation location) {
         return new MeteoScraper(location);
+    }
+
+    public DataTerritoireScraper getDataTerritoireScraper(URL url) {
+        return new DataTerritoireScraper(url);
     }
 
     public <T> T executeModel(Function<Model, T> action) {

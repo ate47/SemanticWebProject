@@ -4,6 +4,9 @@
     <div @click="callTerritoire" class="cursor-pointer">
       Test Territoire scraping
     </div>
+    <div @click="callDataTerritoire" class="cursor-pointer">
+      Test Data Territoire scraping
+    </div>
     <div @click="callMeteoCiel" class="cursor-pointer">
       Test MeteoCiel scraping
     </div>
@@ -23,6 +26,10 @@ export default {
   methods: {
     callTerritoire: async function () {
       const answer = await api.territoire();
+      this.lastMessage = `used the scraper '${answer.usedScraper}' to add ${answer.newTriple} tiple(s)`;
+    },
+    callDataTerritoire: async function () {
+      const answer = await api.dataterritoire();
       this.lastMessage = `used the scraper '${answer.usedScraper}' to add ${answer.newTriple} tiple(s)`;
     },
     callMeteoCiel: async function () {
