@@ -13,6 +13,15 @@ export default {
       .then((result) => result.data);
   },
   /**
+   * request the scraping of the territoire kg csv
+   * @returns {Promise<any>} the api return value
+   */
+  dataterritoire: async function () {
+    return axios
+      .get(backendEndpoint + "/dataterritoire")
+      .then((result) => result.data);
+  },
+  /**
    * request the scraping of the meteociel
    * @returns {Promise<any>} the api return value
    */
