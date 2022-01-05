@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.atesab.sw.project.scraper.ScraperManager;
 import fr.atesab.sw.project.scraper.ScrapingResult;
 import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
+import fr.atesab.sw.project.scraper.territoire.DataTerritoireScraper;
 
 @RestController
 @RequestMapping("/api/")
@@ -42,6 +43,12 @@ public class ResearchController {
     @GetMapping("/territoire")
     ScrapingResult territoire() {
         return scraperManager.executeModel(scraperManager.getTerritoire()::loadTriples);
+    }
+
+    @GetMapping("/dataterritoire")
+    ScrapingResult dataTerritoire() {
+        return scraperManager.executeModel(scraperManager.getDataTerritoireScraper(
+                DataTerritoireScraper.DEMO_DAILY_SENSOR)::loadTriples);
     }
 
     @GetMapping("/meteociel")
