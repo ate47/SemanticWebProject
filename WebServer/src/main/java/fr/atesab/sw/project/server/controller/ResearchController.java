@@ -32,6 +32,9 @@ public class ResearchController {
     public static record RoomAnswer(List<String> rooms) {
     };
 
+    public static record FloorAnswer(List<String> floors) {
+    };
+
     @Autowired
     ScraperManager scraperManager;
 
@@ -60,8 +63,8 @@ public class ResearchController {
     }
 
     @GetMapping("/territoire/floors")
-    public RoomAnswer territoireFloors() {
-        return new RoomAnswer(scraperManager.selectUris("etage", "SELECT ?etage "
+    public FloorAnswer territoireFloors() {
+        return new FloorAnswer(scraperManager.selectUris("etage", "SELECT ?etage "
                 + "WHERE { "
                 + "?etage a <https://w3id.org/bot#Storey> "
                 + "}"));
