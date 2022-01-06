@@ -95,7 +95,7 @@ public class ScraperManager {
         return executeConnection(conneg -> {
             try (QueryExecution exec = conneg.query(q)) {
                 ResultSet set = exec.execSelect();
-                while (set.hasNext()) {
+                if (set.hasNext()) {
                     return selection.apply(set.next());
                 }
             }
