@@ -2,6 +2,7 @@ package fr.atesab.sw.project.scraper.territoire;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,6 +63,7 @@ public class DataTerritoireScraper extends Scraper {
     @Override
     public ScrapingResult loadTriples(Model model) throws ScraperException {
         Property hasRoom = model.createProperty(SensorData.SENSOR_INDEX + "hasRoom");
+        Property date = model.createProperty(SensorData.SENSOR_INDEX + "date");
         Property hasSensor = model.createProperty(SensorData.SENSOR_INDEX + "hasSensor");
         Property hasHumidity = model.createProperty(SensorData.SENSOR_INDEX + "hasHumidity");
         Property hasLuminosity = model.createProperty(SensorData.SENSOR_INDEX + "hasLuminosity");
@@ -75,7 +77,7 @@ public class DataTerritoireScraper extends Scraper {
 
         reader.readFile((SensorData data) -> {
             Resource r = data.getResource(model);
-            int t = 4; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor) * 2
+            int t = 5; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor) * 2 + date
 
             model.add(r, hasRoom, model.createResource(data.location()));
 
@@ -83,6 +85,8 @@ public class DataTerritoireScraper extends Scraper {
                     model.createResource(SensorData.SENSOR_INDEX + "SensorData"));
 
             model.add(r, hasSensor, sensorData);
+            model.add(sensorData, date,
+                    model.createTypedLiteral(data.time().toInstant().toString(), XSDDatatype.XSDdateTime));
 
             t += addIfPresent(model, data.humidity(), sensorData, hasHumidity);
             t += addIfPresent(model, data.luminosity(), sensorData, hasLuminosity);

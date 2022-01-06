@@ -107,7 +107,9 @@ public class ScraperManager {
         T t;
         synchronized (model) {
             t = action.apply(model);
+            System.out.println("executing model...");
             acceptConnection(conneg -> conneg.load(model));
+            System.out.println("end executing model.");
             model.removeAll();
         }
         return t;
