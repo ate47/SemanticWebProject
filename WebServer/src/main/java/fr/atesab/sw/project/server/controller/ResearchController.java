@@ -1,7 +1,9 @@
 package fr.atesab.sw.project.server.controller;
 
-import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +22,27 @@ import fr.atesab.sw.project.scraper.territoire.SensorData;
 @RequestMapping("/api/")
 
 public class ResearchController {
+    @JsonInclude(Include.NON_NULL)
     public static record ApiEndPoint(String message) {
     };
 
-    public static record RoomAnswerElement(String iri, String label, List<String> sensors) {
+    @JsonInclude(Include.NON_NULL)
+    public static record RoomAnswerElement(String iri, String label, List<String> sensors, FloorAnswerElement floor) {
     };
 
+    @JsonInclude(Include.NON_NULL)
     public static record RoomAnswer(List<RoomAnswerElement> rooms) {
     };
 
+    @JsonInclude(Include.NON_NULL)
     public static record SensorAnswer(List<String> sensors) {
     };
 
+    @JsonInclude(Include.NON_NULL)
     public static record FloorAnswerElement(String iri, String label, List<RoomAnswerElement> rooms) {
     };
 
+    @JsonInclude(Include.NON_NULL)
     public static record FloorAnswer(List<FloorAnswerElement> floors) {
     };
 
@@ -82,7 +90,7 @@ public class ResearchController {
                     return pss.asQuery();
                 },
                 solu -> new FloorAnswerElement(solu.get("etage").asResource().getURI(),
-                        solu.get("label").asLiteral().getString(), Collections.emptyList())));
+                        solu.get("label").asLiteral().getString(), null)));
     }
 
     @GetMapping("/floor")
@@ -110,17 +118,25 @@ public class ResearchController {
             @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
         return scraperManager.selectOne(() -> {
             ParameterizedSparqlString pss = new ParameterizedSparqlString();
-            pss.append("SELECT ?label ");
+            pss.append("SELECT ?label ?floorlabel ?flooriri ");
             pss.append("WHERE { ");
             pss.appendIri(room);
             pss.append(" <http://www.w3.org/2000/01/rdf-schema#label> ?label .");
+            pss.append("?flooriri <https://w3id.org/bot#hasSpace> ");
+            pss.appendIri(room);
+            pss.append(" . ");
+            pss.append("?flooriri <http://www.w3.org/2000/01/rdf-schema#label> ?floorlabel . ");
             pss.append("FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), ");
+            pss.appendLiteral(lang);
+            pss.append("))");
+            pss.append("FILTER(LANG(?floorlabel) = \"\" || LANGMATCHES(LANG(?floorlabel), ");
             pss.appendLiteral(lang);
             pss.append("))");
             pss.append("}");
             return pss.asQuery();
         }, solu -> new RoomAnswerElement(room, solu.get("label").asLiteral().getString(),
-                sensors(room, lang).sensors()));
+                sensors(room, lang).sensors(), new FloorAnswerElement(solu.get("flooriri").asResource().getURI(),
+                        solu.get("floorlabel").asLiteral().getString(), null)));
     }
 
     @GetMapping("/rooms")
@@ -140,7 +156,7 @@ public class ResearchController {
             pss.append("}");
             return pss.asQuery();
         }, solu -> new RoomAnswerElement(solu.get("room").asResource().getURI(),
-                solu.get("label").asLiteral().getString(), Collections.emptyList())));
+                solu.get("label").asLiteral().getString(), null, null)));
     }
 
     @GetMapping("/sensors")

@@ -1,7 +1,9 @@
 <template>
   <div>
-    <router-link to="/">...Floors</router-link>
     <div v-if="roomLoaded">
+      <router-link :to="'/floor/' + encodeURIComponent(roomData.floor.iri)"
+        >...{{ roomData.floor.label }}</router-link
+      >
       <div class="text-2xl text-black">{{ roomData.label }}</div>
       <ul>
         <li v-if="roomData.sensors.length === 0">No sensor for this room 😢</li>
