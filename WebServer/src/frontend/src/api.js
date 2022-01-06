@@ -40,7 +40,7 @@ export default {
   rooms: async function (floor) {
     return axios
       .get(backendEndpoint + "/rooms?floor=" + floor)
-      .then((result) => result.data);
+      .then((result) => result.data.rooms);
   },
 
   /**
