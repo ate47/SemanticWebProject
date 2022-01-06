@@ -62,6 +62,7 @@ public class DataTerritoireScraper extends Scraper {
     @Override
     public ScrapingResult loadTriples(Model model) throws ScraperException {
         Property hasRoom = model.createProperty(SensorData.SENSOR_INDEX + "hasRoom");
+        Property hasSensor = model.createProperty(SensorData.SENSOR_INDEX + "hasSensor");
         Property hasHumidity = model.createProperty(SensorData.SENSOR_INDEX + "hasHumidity");
         Property hasLuminosity = model.createProperty(SensorData.SENSOR_INDEX + "hasLuminosity");
         Property hasSnd = model.createProperty(SensorData.SENSOR_INDEX + "hasSnd");
@@ -74,16 +75,21 @@ public class DataTerritoireScraper extends Scraper {
 
         reader.readFile((SensorData data) -> {
             Resource r = data.getResource(model);
-            int t = 2; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor)
+            int t = 4; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor) * 2
 
             model.add(r, hasRoom, model.createResource(data.location()));
 
-            t += addIfPresent(model, data.humidity(), r, hasHumidity);
-            t += addIfPresent(model, data.luminosity(), r, hasLuminosity);
-            t += addIfPresent(model, data.snd(), r, hasSnd);
-            t += addIfPresent(model, data.sndf(), r, hasSndf);
-            t += addIfPresent(model, data.sndm(), r, hasSndm);
-            t += addIfPresent(model, data.temperature(), r, hasTemperature);
+            Resource sensorData = model.createResource(SensorData.SENSOR_INDEX + "SD" + data.time().getTime(),
+                    model.createResource(SensorData.SENSOR_INDEX + "SensorData"));
+
+            model.add(r, hasSensor, sensorData);
+
+            t += addIfPresent(model, data.humidity(), sensorData, hasHumidity);
+            t += addIfPresent(model, data.luminosity(), sensorData, hasLuminosity);
+            t += addIfPresent(model, data.snd(), sensorData, hasSnd);
+            t += addIfPresent(model, data.sndf(), sensorData, hasSndf);
+            t += addIfPresent(model, data.sndm(), sensorData, hasSndm);
+            t += addIfPresent(model, data.temperature(), sensorData, hasTemperature);
 
             triples.addAndGet(t);
         });

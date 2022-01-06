@@ -14,6 +14,7 @@ import fr.atesab.sw.project.scraper.ScraperManager;
 import fr.atesab.sw.project.scraper.ScrapingResult;
 import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
 import fr.atesab.sw.project.scraper.territoire.DataTerritoireScraper;
+import fr.atesab.sw.project.scraper.territoire.SensorData;
 
 @RestController
 @RequestMapping("/api/")
@@ -22,10 +23,13 @@ public class ResearchController {
     public static record ApiEndPoint(String message) {
     };
 
-    public static record RoomAnswerElement(String iri, String label) {
+    public static record RoomAnswerElement(String iri, String label, List<String> sensors) {
     };
 
     public static record RoomAnswer(List<RoomAnswerElement> rooms) {
+    };
+
+    public static record SensorAnswer(List<String> sensors) {
     };
 
     public static record FloorAnswerElement(String iri, String label, List<RoomAnswerElement> rooms) {
@@ -115,7 +119,8 @@ public class ResearchController {
             pss.append("))");
             pss.append("}");
             return pss.asQuery();
-        }, solu -> new RoomAnswerElement(room, solu.get("label").asLiteral().getString()));
+        }, solu -> new RoomAnswerElement(room, solu.get("label").asLiteral().getString(),
+                sensors(room, lang).sensors()));
     }
 
     @GetMapping("/rooms")
@@ -135,7 +140,23 @@ public class ResearchController {
             pss.append("}");
             return pss.asQuery();
         }, solu -> new RoomAnswerElement(solu.get("room").asResource().getURI(),
-                solu.get("label").asLiteral().getString())));
+                solu.get("label").asLiteral().getString(), Collections.emptyList())));
+    }
+
+    @GetMapping("/sensors")
+    public SensorAnswer sensors(
+            @RequestParam("room") String room,
+            @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
+        return new SensorAnswer(scraperManager.selectUris("sensor", () -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append("SELECT ?sensor ");
+            pss.append("WHERE { ");
+            pss.append("?sensor <" + SensorData.SENSOR_INDEX + "hasRoom> ");
+            pss.appendIri(room);
+            pss.append(". ");
+            pss.append("}");
+            return pss.asQuery();
+        }));
     }
 
     @GetMapping("/dataterritoire")

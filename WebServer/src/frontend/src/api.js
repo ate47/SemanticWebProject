@@ -44,6 +44,17 @@ export default {
   },
 
   /**
+   * requests the sensors of a room
+   * @param {string} room the room
+   * @returns {Promise<Array<any>>} the api return value
+   */
+  sensor: async function (room) {
+    return axios
+      .get(backendEndpoint + "/sensors?room=" + room)
+      .then((result) => result.data.sensor);
+  },
+
+  /**
    * requests a floor
    * @param {string} floor the floor
    * @returns {Promise<any>} the api return value
