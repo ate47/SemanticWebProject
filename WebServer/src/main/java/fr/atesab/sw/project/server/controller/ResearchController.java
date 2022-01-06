@@ -1,5 +1,6 @@
 package fr.atesab.sw.project.server.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.jena.query.ParameterizedSparqlString;
@@ -27,7 +28,7 @@ public class ResearchController {
     public static record RoomAnswer(List<RoomAnswerElement> rooms) {
     };
 
-    public static record FloorAnswerElement(String iri, String label) {
+    public static record FloorAnswerElement(String iri, String label, List<RoomAnswerElement> rooms) {
     };
 
     public static record FloorAnswer(List<FloorAnswerElement> floors) {
@@ -77,7 +78,7 @@ public class ResearchController {
                     return pss.asQuery();
                 },
                 solu -> new FloorAnswerElement(solu.get("etage").asResource().getURI(),
-                        solu.get("label").asLiteral().getString())));
+                        solu.get("label").asLiteral().getString(), Collections.emptyList())));
     }
 
     @GetMapping("/floor")
@@ -95,7 +96,8 @@ public class ResearchController {
             pss.append("))");
             pss.append("}");
             return pss.asQuery();
-        }, solu -> new FloorAnswerElement(floor, solu.get("label").asLiteral().getString()));
+        }, solu -> new FloorAnswerElement(floor, solu.get("label").asLiteral().getString(),
+                territoireRooms(floor, lang).rooms()));
     }
 
     @GetMapping("/room")
