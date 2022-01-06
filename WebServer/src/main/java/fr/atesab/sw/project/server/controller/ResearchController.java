@@ -21,10 +21,16 @@ public class ResearchController {
     public static record ApiEndPoint(String message) {
     };
 
-    public static record RoomAnswer(List<String> rooms) {
+    public static record RoomAnswerElement(String iri, String label) {
     };
 
-    public static record FloorAnswer(List<String> floors) {
+    public static record RoomAnswer(List<RoomAnswerElement> rooms) {
+    };
+
+    public static record FloorAnswerElement(String iri, String label) {
+    };
+
+    public static record FloorAnswer(List<FloorAnswerElement> floors) {
     };
 
     @Autowired
@@ -55,26 +61,43 @@ public class ResearchController {
     }
 
     @GetMapping("/territoire/floors")
-    public FloorAnswer territoireFloors() {
-        return new FloorAnswer(scraperManager.selectUris("etage", "SELECT ?etage "
-                + "WHERE { "
-                + "?etage a <https://w3id.org/bot#Storey> "
-                + "}"));
+    public FloorAnswer territoireFloors(
+            @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
+        return new FloorAnswer(scraperManager.select(
+                () -> {
+                    ParameterizedSparqlString pss = new ParameterizedSparqlString();
+                    pss.append("SELECT ?etage ?label ");
+                    pss.append("WHERE { ");
+                    pss.append("?etage a <https://w3id.org/bot#Storey> . ");
+                    pss.append("?etage <http://www.w3.org/2000/01/rdf-schema#label> ?label . ");
+                    pss.append("FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), ");
+                    pss.appendLiteral(lang);
+                    pss.append("))");
+                    pss.append("}");
+                    return pss.asQuery();
+                },
+                solu -> new FloorAnswerElement(solu.get("etage").asResource().getURI(),
+                        solu.get("label").asLiteral().getString())));
     }
 
     @GetMapping("/territoire/rooms")
     public RoomAnswer territoireRooms(
-            @RequestParam("floor") String floor) {
-        return new RoomAnswer(scraperManager.selectUris("room", () -> {
+            @RequestParam("floor") String floor,
+            @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
+        return new RoomAnswer(scraperManager.select(() -> {
             ParameterizedSparqlString pss = new ParameterizedSparqlString();
-            pss.append("SELECT ?room ");
+            pss.append("SELECT ?room ?label ");
             pss.append("WHERE { ");
             pss.appendIri(floor);
             pss.append(" <https://w3id.org/bot#hasSpace> ?room .");
-            pss.append("?room a <https://w3id.org/bot#Space> .");
+            pss.append("?room <http://www.w3.org/2000/01/rdf-schema#label> ?label .");
+            pss.append("FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), ");
+            pss.appendLiteral(lang);
+            pss.append("))");
             pss.append("}");
             return pss.asQuery();
-        }));
+        }, solu -> new RoomAnswerElement(solu.get("room").asResource().getURI(),
+                solu.get("label").asLiteral().getString())));
     }
 
     @GetMapping("/dataterritoire")

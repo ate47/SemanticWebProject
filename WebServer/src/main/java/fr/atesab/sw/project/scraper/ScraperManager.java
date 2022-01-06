@@ -59,20 +59,26 @@ public class ScraperManager {
         }
     }
 
+    public <T> List<T> select(String query, Function<QuerySolution, T> selection) {
+        return select(() -> QueryFactory.create(query), selection);
+    }
+
     public List<String> selectUris(String uriProp, String query) {
-        return selectUris(uriProp, () -> QueryFactory.create(query));
+        return select(query, solu -> solu.get(uriProp).asResource().getURI());
     }
 
     public List<String> selectUris(String uriProp, Supplier<Query> query) {
+        return select(query, solu -> solu.get(uriProp).asResource().getURI());
+    }
+
+    public <T> List<T> select(Supplier<Query> query, Function<QuerySolution, T> selection) {
         Query q = query.get();
         return executeConnection(conneg -> {
-            List<String> uris = new ArrayList<>();
+            List<T> uris = new ArrayList<>();
             try (QueryExecution exec = conneg.query(q)) {
                 ResultSet set = exec.execSelect();
                 while (set.hasNext()) {
-                    QuerySolution solu = set.next();
-                    RDFNode solution = solu.get(uriProp);
-                    uris.add(solution.asResource().getURI());
+                    uris.add(selection.apply(set.next()));
                 }
             }
             return uris;
