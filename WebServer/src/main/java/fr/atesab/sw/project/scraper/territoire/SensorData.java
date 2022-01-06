@@ -7,12 +7,16 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
+
 import fr.atesab.sw.project.utils.ScraperUtils;
 
 public record SensorData(String name, Date time,
         OptionalDouble humidity, OptionalDouble luminosity, OptionalDouble snd,
         OptionalDouble sndf, OptionalDouble sndm, OptionalDouble temperature, UUID id, String location, String type) {
 
+    public static final String SENSOR_INDEX = "http://example.com/Sensor#";
     private static final Pattern IRILOCATION_PATTERN = Pattern.compile("emse/fayol/e([^/]+)/S([^/]+)");
     /**
      * convert raw location to iri location, example
@@ -43,5 +47,17 @@ public record SensorData(String name, Date time,
                 ScraperUtils.optionalDoubleOf(raw[4]), ScraperUtils.optionalDoubleOf(raw[5]),
                 ScraperUtils.optionalDoubleOf(raw[6]), ScraperUtils.optionalDoubleOf(raw[7]), UUID.fromString(raw[8]),
                 iriLocationFromCsvRaw(raw[9]), raw[10]);
+    }
+
+    /**
+     * get the resource of type sensor:Sensor for this Sensor
+     * 
+     * @param model the model to create Resources
+     * @return the Resource
+     */
+    public Resource getResource(Model model) {
+        return model.createResource(
+                SENSOR_INDEX + "S" + id().toString().replace("-", ""),
+                model.createResource(SENSOR_INDEX + "Sensor"));
     }
 }
