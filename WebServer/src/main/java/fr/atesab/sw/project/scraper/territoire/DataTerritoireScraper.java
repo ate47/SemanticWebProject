@@ -3,6 +3,7 @@ package fr.atesab.sw.project.scraper.territoire;
 import java.io.File;
 import java.net.URL;
 import java.util.OptionalDouble;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Model;
@@ -21,10 +22,22 @@ public class DataTerritoireScraper extends Scraper {
     public static final URL DEMO_DAILY_SENSOR = ScraperUtils.errorIfException(() -> new URL(
             "https://seafile.emse.fr/d/710ced68c2894189a6f4/files/?p=%2F20211116-daily-sensor-measures.csv&dl=1"));
 
-    private static void addIfPresent(Model model, OptionalDouble value, Resource subject, Property predictate) {
+    /**
+     * add the triple (subject, predicate, value^^xsd:double) to the model if the
+     * value is present
+     * 
+     * @param model      the model to add
+     * @param value      the value
+     * @param subject    the subject
+     * @param predictate the predicate
+     * @return 1 if a triple was added, 0 otherwise
+     */
+    private static int addIfPresent(Model model, OptionalDouble value, Resource subject, Property predictate) {
         if (value.isPresent()) {
             model.add(subject, predictate, String.valueOf(value.getAsDouble()), XSDDatatype.XSDdouble);
+            return 1;
         }
+        return 0;
     }
 
     private CSVReader<SensorData> reader;
@@ -48,6 +61,7 @@ public class DataTerritoireScraper extends Scraper {
 
     @Override
     public ScrapingResult loadTriples(Model model) throws ScraperException {
+        Property hasRoom = model.createProperty(SensorData.SENSOR_INDEX + "hasRoom");
         Property hasHumidity = model.createProperty(SensorData.SENSOR_INDEX + "hasHumidity");
         Property hasLuminosity = model.createProperty(SensorData.SENSOR_INDEX + "hasLuminosity");
         Property hasSnd = model.createProperty(SensorData.SENSOR_INDEX + "hasSnd");
@@ -55,16 +69,26 @@ public class DataTerritoireScraper extends Scraper {
         Property hasSndm = model.createProperty(SensorData.SENSOR_INDEX + "hasSndm");
         Property hasTemperature = model.createProperty(SensorData.SENSOR_INDEX + "hasTemperature");
 
-        return createResult(reader.readFile((SensorData data) -> {
-            Resource r = data.getResource(model);
+        // number of triples added
+        AtomicInteger triples = new AtomicInteger();
 
-            addIfPresent(model, data.humidity(), r, hasHumidity);
-            addIfPresent(model, data.luminosity(), r, hasLuminosity);
-            addIfPresent(model, data.snd(), r, hasSnd);
-            addIfPresent(model, data.sndf(), r, hasSndf);
-            addIfPresent(model, data.sndm(), r, hasSndm);
-            addIfPresent(model, data.temperature(), r, hasTemperature);
-        }));
+        reader.readFile((SensorData data) -> {
+            Resource r = data.getResource(model);
+            int t = 2; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor)
+
+            model.add(r, hasRoom, model.createResource(data.location()));
+
+            t += addIfPresent(model, data.humidity(), r, hasHumidity);
+            t += addIfPresent(model, data.luminosity(), r, hasLuminosity);
+            t += addIfPresent(model, data.snd(), r, hasSnd);
+            t += addIfPresent(model, data.sndf(), r, hasSndf);
+            t += addIfPresent(model, data.sndm(), r, hasSndm);
+            t += addIfPresent(model, data.temperature(), r, hasTemperature);
+
+            triples.addAndGet(t);
+        });
+
+        return createResult(triples.get());
     }
 
 }
