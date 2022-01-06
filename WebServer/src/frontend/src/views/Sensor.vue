@@ -11,6 +11,7 @@
           <th>month</th>
           <th>day</th>
           <th>hours</th>
+          <th>external temp</th>
         </tr>
         <tr :key="sensor" v-for="sensor in sensorData">
           <td>{{ sensor.temperature }}</td>
@@ -18,6 +19,7 @@
           <td>{{ sensor.month }}</td>
           <td>{{ sensor.day }}</td>
           <td>{{ sensor.hours }}</td>
+          <td>{{ sensor.externaltemp }}</td>
         </tr>
       </table>
     </div>

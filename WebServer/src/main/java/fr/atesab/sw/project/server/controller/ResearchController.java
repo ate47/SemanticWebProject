@@ -45,7 +45,8 @@ public class ResearchController {
     };
 
     @JsonInclude(Include.NON_NULL)
-    public static record SensorDataAnswer(String iri, float temperature, int year, int month, int day, int hours) {
+    public static record SensorDataAnswer(float temperature, int year, int month, int day, int hours,
+            float externaltemp) {
     };
 
     @JsonInclude(Include.NON_NULL)
@@ -199,26 +200,31 @@ public class ResearchController {
         return new SensorDataListAnswer(scraperManager.select(() -> {
             ParameterizedSparqlString pss = new ParameterizedSparqlString();
             pss.append(
-                    "SELECT ?iri (AVG(?temperature) as ?avgtemp) ?year ?month ?day ?hours ");
+                    "SELECT (AVG(?temperature) as ?avgtemp) ?year ?month ?day ?hours ");
             pss.append("WHERE { ");
             pss.appendIri(sensor);
             pss.append(" <" + SensorData.SENSOR_INDEX + "hasSensor> ?iri . ");
             pss.append("?iri <" + SensorData.SENSOR_INDEX + "date> ?date ; ");
             pss.append("     <" + SensorData.SENSOR_INDEX + "hasTemperature> ?temperature . ");
             pss.append("} ");
-            pss.append("GROUP BY ?iri ");
+            pss.append("GROUP BY ");
             pss.append("(YEAR(?date) as ?year) ");
             pss.append("(MONTH(?date) as ?month) ");
             pss.append("(DAY(?date) as ?day) ");
             pss.append("(HOURS(?date) as ?hours) ");
             return pss.asQuery();
-        }, solu -> new SensorDataAnswer(
-                solu.get("iri").asResource().getURI(),
-                solu.get("avgtemp").asLiteral().getFloat(),
-                solu.get("year").asLiteral().getInt(),
-                solu.get("month").asLiteral().getInt(),
-                solu.get("day").asLiteral().getInt(),
-                solu.get("hours").asLiteral().getInt())));
+        }, solu -> {
+            int year = solu.get("year").asLiteral().getInt();
+            int month = solu.get("month").asLiteral().getInt();
+            int day = solu.get("day").asLiteral().getInt();
+            int hours = solu.get("hours").asLiteral().getInt();
+            var t = meteo(day, month, year, hours).elements();
+            if (t.size() == 0)
+                return null;
+            return new SensorDataAnswer(
+                    solu.get("avgtemp").asLiteral().getFloat(),
+                    year, month, day, hours, t.get(0).temperature());
+        }));
     }
 
     @GetMapping("/dataterritoire")
@@ -258,7 +264,8 @@ public class ResearchController {
     MeteoData meteo(
             @RequestParam(name = "day", defaultValue = "0", required = false) int day,
             @RequestParam(name = "month", defaultValue = "0", required = false) int month,
-            @RequestParam(name = "year", defaultValue = "0", required = false) int year) {
+            @RequestParam(name = "year", defaultValue = "0", required = false) int year,
+            @RequestParam(name = "hours", defaultValue = "0", required = false) int hours) {
         meteosciel(MeteoCielLocation.METEOCIEL_ID_SAINT_ETIENNE, day, month, year);
         return new MeteoData(scraperManager.select(() -> {
             ParameterizedSparqlString pss = new ParameterizedSparqlString();
@@ -276,10 +283,13 @@ public class ResearchController {
             pss.append(" && ");
             pss.append("  YEAR(?date) = ");
             pss.appendLiteral(year);
+            pss.append(" && ");
+            pss.append("  HOURS(?date) = ");
+            pss.appendLiteral(hours);
             pss.append(" ");
             pss.append(") ");
             pss.append("}");
-            return null;
+            return pss.asQuery();
         }, solu -> new MeteoDataElement(solu.get("date").asLiteral().getInt(),
                 solu.get("temp").asLiteral().getFloat())));
     }

@@ -84,7 +84,9 @@ public class ScraperManager {
             try (QueryExecution exec = conneg.query(q)) {
                 ResultSet set = exec.execSelect();
                 while (set.hasNext()) {
-                    uris.add(selection.apply(set.next()));
+                    T t = selection.apply(set.next());
+                    if (t != null)
+                        uris.add(t);
                 }
             }
             return uris;
