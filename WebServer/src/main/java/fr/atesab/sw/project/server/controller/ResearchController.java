@@ -1,5 +1,7 @@
 package fr.atesab.sw.project.server.controller;
 
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +45,18 @@ public class ResearchController {
     @GetMapping("/territoire")
     ScrapingResult territoire() {
         return scraperManager.executeModel(scraperManager.getTerritoire()::loadTriples);
+    }
+
+    @GetMapping("/territoire/rooms")
+    public void RecupRooms() {
+        ParameterizedSparqlString queryStr = new ParameterizedSparqlString();
+        // queryStr.setNsPrefix("sw", "https://territoire.emse.fr/kg/);
+        queryStr.append("SELECT ?etage");
+        queryStr.append("WHERE {");
+        queryStr.append(" ?etage a https://w3id.org/bot#Storey%22");
+        queryStr.append("}");
+        Query q = queryStr.asQuery();
+
     }
 
     @GetMapping("/dataterritoire")
