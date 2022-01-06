@@ -60,7 +60,7 @@ public class ResearchController {
         return scraperManager.executeModel(scraperManager.getTerritoire()::loadTriples);
     }
 
-    @GetMapping("/territoire/floors")
+    @GetMapping("/floors")
     public FloorAnswer territoireFloors(
             @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
         return new FloorAnswer(scraperManager.select(
@@ -80,7 +80,43 @@ public class ResearchController {
                         solu.get("label").asLiteral().getString())));
     }
 
-    @GetMapping("/territoire/rooms")
+    @GetMapping("/floor")
+    public FloorAnswerElement floor(
+            @RequestParam("floor") String floor,
+            @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
+        return scraperManager.selectOne(() -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append("SELECT ?label ");
+            pss.append("WHERE { ");
+            pss.appendIri(floor);
+            pss.append(" <http://www.w3.org/2000/01/rdf-schema#label> ?label .");
+            pss.append("FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), ");
+            pss.appendLiteral(lang);
+            pss.append("))");
+            pss.append("}");
+            return pss.asQuery();
+        }, solu -> new FloorAnswerElement(floor, solu.get("label").asLiteral().getString()));
+    }
+
+    @GetMapping("/room")
+    public RoomAnswerElement room(
+            @RequestParam("room") String room,
+            @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {
+        return scraperManager.selectOne(() -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append("SELECT ?label ");
+            pss.append("WHERE { ");
+            pss.appendIri(room);
+            pss.append(" <http://www.w3.org/2000/01/rdf-schema#label> ?label .");
+            pss.append("FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), ");
+            pss.appendLiteral(lang);
+            pss.append("))");
+            pss.append("}");
+            return pss.asQuery();
+        }, solu -> new RoomAnswerElement(room, solu.get("label").asLiteral().getString()));
+    }
+
+    @GetMapping("/rooms")
     public RoomAnswer territoireRooms(
             @RequestParam("floor") String floor,
             @RequestParam(name = "lang", required = false, defaultValue = "en") String lang) {

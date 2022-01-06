@@ -3,6 +3,7 @@ package fr.atesab.sw.project.scraper;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,16 +60,16 @@ public class ScraperManager {
         }
     }
 
-    public <T> List<T> select(String query, Function<QuerySolution, T> selection) {
-        return select(() -> QueryFactory.create(query), selection);
-    }
-
     public List<String> selectUris(String uriProp, String query) {
         return select(query, solu -> solu.get(uriProp).asResource().getURI());
     }
 
     public List<String> selectUris(String uriProp, Supplier<Query> query) {
         return select(query, solu -> solu.get(uriProp).asResource().getURI());
+    }
+
+    public <T> List<T> select(String query, Function<QuerySolution, T> selection) {
+        return select(() -> QueryFactory.create(query), selection);
     }
 
     public <T> List<T> select(Supplier<Query> query, Function<QuerySolution, T> selection) {
@@ -82,6 +83,23 @@ public class ScraperManager {
                 }
             }
             return uris;
+        });
+    }
+
+    public <T> T selectOne(String query, Function<QuerySolution, T> selection) {
+        return selectOne(() -> QueryFactory.create(query), selection);
+    }
+
+    public <T> T selectOne(Supplier<Query> query, Function<QuerySolution, T> selection) {
+        Query q = query.get();
+        return executeConnection(conneg -> {
+            try (QueryExecution exec = conneg.query(q)) {
+                ResultSet set = exec.execSelect();
+                while (set.hasNext()) {
+                    return selection.apply(set.next());
+                }
+            }
+            throw new NoSuchElementException();
         });
     }
 
