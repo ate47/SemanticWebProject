@@ -2,7 +2,6 @@ package fr.atesab.sw.project.scraper.territoire;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -65,17 +64,19 @@ public class DataTerritoireScraper extends Scraper {
         Property hasRoom = model.createProperty(SensorData.SENSOR_INDEX + "hasRoom");
         Property date = model.createProperty(SensorData.SENSOR_INDEX + "date");
         Property hasSensor = model.createProperty(SensorData.SENSOR_INDEX + "hasSensor");
-        Property hasHumidity = model.createProperty(SensorData.SENSOR_INDEX + "hasHumidity");
-        Property hasLuminosity = model.createProperty(SensorData.SENSOR_INDEX + "hasLuminosity");
-        Property hasSnd = model.createProperty(SensorData.SENSOR_INDEX + "hasSnd");
-        Property hasSndf = model.createProperty(SensorData.SENSOR_INDEX + "hasSndf");
-        Property hasSndm = model.createProperty(SensorData.SENSOR_INDEX + "hasSndm");
+        // Property hasHumidity = model.createProperty(SensorData.SENSOR_INDEX +
+        // "hasHumidity");
+        // Property hasLuminosity = model.createProperty(SensorData.SENSOR_INDEX +
+        // "hasLuminosity");
+        // Property hasSnd = model.createProperty(SensorData.SENSOR_INDEX + "hasSnd");
+        // Property hasSndf = model.createProperty(SensorData.SENSOR_INDEX + "hasSndf");
+        // Property hasSndm = model.createProperty(SensorData.SENSOR_INDEX + "hasSndm");
         Property hasTemperature = model.createProperty(SensorData.SENSOR_INDEX + "hasTemperature");
 
         // number of triples added
         AtomicInteger triples = new AtomicInteger();
 
-        reader.readFile((SensorData data) -> {
+        reader.readFile(10000, (SensorData data) -> {
             Resource r = data.getResource(model);
             int t = 5; // number of triples added: 2 = (r, hasRoom, room) + (r, a, Sensor) * 2 + date
 
@@ -90,11 +91,11 @@ public class DataTerritoireScraper extends Scraper {
             model.add(sensorData, date,
                     model.createTypedLiteral(data.time().toInstant().toString(), XSDDatatype.XSDdateTime));
 
-            t += addIfPresent(model, data.humidity(), sensorData, hasHumidity);
-            t += addIfPresent(model, data.luminosity(), sensorData, hasLuminosity);
-            t += addIfPresent(model, data.snd(), sensorData, hasSnd);
-            t += addIfPresent(model, data.sndf(), sensorData, hasSndf);
-            t += addIfPresent(model, data.sndm(), sensorData, hasSndm);
+            // t += addIfPresent(model, data.humidity(), sensorData, hasHumidity);
+            // t += addIfPresent(model, data.luminosity(), sensorData, hasLuminosity);
+            // t += addIfPresent(model, data.snd(), sensorData, hasSnd);
+            // t += addIfPresent(model, data.sndf(), sensorData, hasSndf);
+            // t += addIfPresent(model, data.sndm(), sensorData, hasSndm);
             t += addIfPresent(model, data.temperature(), sensorData, hasTemperature);
 
             triples.addAndGet(t);

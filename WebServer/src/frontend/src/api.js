@@ -48,10 +48,20 @@ export default {
    * @param {string} room the room
    * @returns {Promise<Array<any>>} the api return value
    */
-  sensor: async function (room) {
+  sensors: async function (room) {
     return axios
       .get(backendEndpoint + "/sensors?room=" + room)
       .then((result) => result.data.sensor);
+  },
+  /**
+   * requests the sensor data of a sensor
+   * @param {string} sensor the sensor
+   * @returns {Promise<Array<any>>} the api return value
+   */
+  sensor: async function (sensor) {
+    return axios
+      .get(backendEndpoint + "/sensor?sensor=" + sensor)
+      .then((result) => result.data.data);
   },
 
   /**

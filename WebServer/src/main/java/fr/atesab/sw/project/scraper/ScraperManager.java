@@ -1,5 +1,6 @@
 package fr.atesab.sw.project.scraper;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,10 @@ public class ScraperManager {
 
     public DataTerritoireScraper getDataTerritoireScraper(URL url) {
         return new DataTerritoireScraper(url);
+    }
+
+    public DataTerritoireScraper getDataTerritoireScraper(File file) {
+        return new DataTerritoireScraper(file);
     }
 
     public void acceptConnection(Consumer<RDFConnection> action) {
@@ -106,11 +111,12 @@ public class ScraperManager {
     public <T> T executeModel(Function<Model, T> action) {
         T t;
         synchronized (model) {
+            model.removeAll();
             t = action.apply(model);
             System.out.println("executing model...");
+            System.out.println(model.size());
             acceptConnection(conneg -> conneg.load(model));
             System.out.println("end executing model.");
-            model.removeAll();
         }
         return t;
     }

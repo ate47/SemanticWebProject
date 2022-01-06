@@ -1,5 +1,6 @@
 package fr.atesab.sw.project.server.controller;
 
+import java.io.File;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -37,6 +38,14 @@ public class ResearchController {
 
     @JsonInclude(Include.NON_NULL)
     public static record SensorAnswer(List<String> sensors) {
+    };
+
+    @JsonInclude(Include.NON_NULL)
+    public static record SensorDataListAnswer(List<SensorDataAnswer> data) {
+    };
+
+    @JsonInclude(Include.NON_NULL)
+    public static record SensorDataAnswer(String iri, float temperature, int year, int month, int day, int hours) {
     };
 
     @JsonInclude(Include.NON_NULL)
@@ -184,10 +193,38 @@ public class ResearchController {
         }));
     }
 
+    @GetMapping("/sensor")
+    public SensorDataListAnswer sensor(
+            @RequestParam("sensor") String sensor) {
+        return new SensorDataListAnswer(scraperManager.select(() -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append(
+                    "SELECT ?iri (AVG(?temperature) as ?avgtemp) ?year ?month ?day ?hours ");
+            pss.append("WHERE { ");
+            pss.appendIri(sensor);
+            pss.append(" <" + SensorData.SENSOR_INDEX + "hasSensor> ?iri . ");
+            pss.append("?iri <" + SensorData.SENSOR_INDEX + "date> ?date ; ");
+            pss.append("     <" + SensorData.SENSOR_INDEX + "hasTemperature> ?temperature . ");
+            pss.append("} ");
+            pss.append("GROUP BY ?iri ");
+            pss.append("(YEAR(?date) as ?year) ");
+            pss.append("(MONTH(?date) as ?month) ");
+            pss.append("(DAY(?date) as ?day) ");
+            pss.append("(HOURS(?date) as ?hours) ");
+            return pss.asQuery();
+        }, solu -> new SensorDataAnswer(
+                solu.get("iri").asResource().getURI(),
+                solu.get("avgtemp").asLiteral().getFloat(),
+                solu.get("year").asLiteral().getInt(),
+                solu.get("month").asLiteral().getInt(),
+                solu.get("day").asLiteral().getInt(),
+                solu.get("hours").asLiteral().getInt())));
+    }
+
     @GetMapping("/dataterritoire")
     ScrapingResult dataTerritoire() {
         return scraperManager.executeModel(scraperManager.getDataTerritoireScraper(
-                DataTerritoireScraper.DEMO_DAILY_SENSOR)::loadTriples);
+                new File("data.csv"))::loadTriples);
     }
 
     @GetMapping("/meteociel")
@@ -225,13 +262,25 @@ public class ResearchController {
         meteosciel(MeteoCielLocation.METEOCIEL_ID_SAINT_ETIENNE, day, month, year);
         return new MeteoData(scraperManager.select(() -> {
             ParameterizedSparqlString pss = new ParameterizedSparqlString();
-            pss.append("SELECT ?hour ?temp ");
+            pss.append("SELECT ?date ?temp ");
             pss.append("WHERE { ");
-            // TODO: add date (also in the scraper)
-            pss.append(MeteoScraper.METEOCIEL_INDEX + "hasTemperature ? temp . ");
+            pss.append("?sensordata a <" + MeteoScraper.METEOCIEL_INDEX + "SensorData>. ");
+            pss.append("?sensordata <" + MeteoScraper.METEOCIEL_INDEX + "date> ?date. ");
+            pss.append("?sensordata <" + MeteoScraper.METEOCIEL_INDEX + "hasTemperature> ?temp . ");
+            pss.append("FILTER ( ");
+            pss.append("  DAY(?date) = ");
+            pss.appendLiteral(day);
+            pss.append(" && ");
+            pss.append("  MONTH(?date) = ");
+            pss.appendLiteral(month);
+            pss.append(" && ");
+            pss.append("  YEAR(?date) = ");
+            pss.appendLiteral(year);
+            pss.append(" ");
+            pss.append(") ");
             pss.append("}");
             return null;
-        }, solu -> new MeteoDataElement(solu.get("hour").asLiteral().getInt(),
+        }, solu -> new MeteoDataElement(solu.get("date").asLiteral().getInt(),
                 solu.get("temp").asLiteral().getFloat())));
     }
 }

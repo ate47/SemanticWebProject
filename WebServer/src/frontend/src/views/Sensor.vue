@@ -1,23 +1,25 @@
 <template>
   <div>
     <div v-if="sensorLoaded">
-      <router-link :to="'/floor/' + encodeURIComponent(sensorData.floor.iri)"
-        >...{{ sensorData.floor.label }}</router-link
-      >
-      <div class="text-2xl text-black">{{ sensorData.label }}</div>
-      <ul>
-        <li v-if="sensorData.sensors.length === 0">
-          No data for this sensor 😢
-        </li>
-        <li :key="sensor" v-for="sensor in sensorData.sensors">
-          <router-link
-            :to="'/sensor/' + encodeURIComponent(sensor)"
-            class="text-gray-700"
-          >
-            {{ sensor }}
-          </router-link>
-        </li>
-      </ul>
+      <table>
+        <tr v-if="sensorData.length === 0">
+          <th>No data for this sensor 😢</th>
+        </tr>
+        <tr v-else>
+          <th>temperature</th>
+          <th>year</th>
+          <th>month</th>
+          <th>day</th>
+          <th>hours</th>
+        </tr>
+        <tr :key="sensor" v-for="sensor in sensorData">
+          <td>{{ sensor.temperature }}</td>
+          <td>{{ sensor.year }}</td>
+          <td>{{ sensor.month }}</td>
+          <td>{{ sensor.day }}</td>
+          <td>{{ sensor.hours }}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
