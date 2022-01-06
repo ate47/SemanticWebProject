@@ -81,7 +81,9 @@ public class DataTerritoireScraper extends Scraper {
 
             model.add(r, hasRoom, model.createResource(data.location()));
 
-            Resource sensorData = model.createResource(SensorData.SENSOR_INDEX + "SD" + data.time().getTime(),
+            Resource sensorData = model.createResource(
+                    SensorData.SENSOR_INDEX + "SD" + data.id().toString().replace("-", "") + "T"
+                            + data.time().getTime(),
                     model.createResource(SensorData.SENSOR_INDEX + "SensorData"));
 
             model.add(r, hasSensor, sensorData);
