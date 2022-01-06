@@ -19,6 +19,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/Room.vue"),
   },
+  {
+    path: "/sensor/:id",
+    name: "Sensor",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/Sensor.vue"),
+  },
 ];
 
 const router = createRouter({

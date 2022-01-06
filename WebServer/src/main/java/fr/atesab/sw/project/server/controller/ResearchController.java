@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fr.atesab.sw.project.scraper.ScraperManager;
 import fr.atesab.sw.project.scraper.ScrapingResult;
 import fr.atesab.sw.project.scraper.meteo.MeteoCielLocation;
+import fr.atesab.sw.project.scraper.meteo.MeteoScraper;
 import fr.atesab.sw.project.scraper.territoire.DataTerritoireScraper;
 import fr.atesab.sw.project.scraper.territoire.SensorData;
 
@@ -44,6 +45,14 @@ public class ResearchController {
 
     @JsonInclude(Include.NON_NULL)
     public static record FloorAnswer(List<FloorAnswerElement> floors) {
+    };
+
+    @JsonInclude(Include.NON_NULL)
+    public static record MeteoData(List<MeteoDataElement> elements) {
+    };
+
+    @JsonInclude(Include.NON_NULL)
+    public static record MeteoDataElement(int hour, float temperature) {
     };
 
     @Autowired
@@ -206,5 +215,23 @@ public class ResearchController {
         } else {
             throw new IllegalArgumentException("bad date");
         }
+    }
+
+    @GetMapping("meteo")
+    MeteoData meteo(
+            @RequestParam(name = "day", defaultValue = "0", required = false) int day,
+            @RequestParam(name = "month", defaultValue = "0", required = false) int month,
+            @RequestParam(name = "year", defaultValue = "0", required = false) int year) {
+        meteosciel(MeteoCielLocation.METEOCIEL_ID_SAINT_ETIENNE, day, month, year);
+        return new MeteoData(scraperManager.select(() -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append("SELECT ?hour ?temp ");
+            pss.append("WHERE { ");
+            // TODO: add date (also in the scraper)
+            pss.append(MeteoScraper.METEOCIEL_INDEX + "hasTemperature ? temp . ");
+            pss.append("}");
+            return null;
+        }, solu -> new MeteoDataElement(solu.get("hour").asLiteral().getInt(),
+                solu.get("temp").asLiteral().getFloat())));
     }
 }
