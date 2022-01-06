@@ -1,11 +1,20 @@
 package fr.atesab.sw.project.scraper;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.springframework.stereotype.Component;
@@ -37,13 +46,44 @@ public class ScraperManager {
         return new DataTerritoireScraper(url);
     }
 
+    public void acceptConnection(Consumer<RDFConnection> action) {
+        executeConnection(conneg -> {
+            action.accept(conneg);
+            return null;
+        });
+    }
+
+    public <T> T executeConnection(Function<RDFConnection, T> action) {
+        try (RDFConnection conneg = RDFConnectionFactory.connect(DATASET_URL)) {
+            return action.apply(conneg);
+        }
+    }
+
+    public List<String> selectUris(String uriProp, String query) {
+        return selectUris(uriProp, () -> QueryFactory.create(query));
+    }
+
+    public List<String> selectUris(String uriProp, Supplier<Query> query) {
+        Query q = query.get();
+        return executeConnection(conneg -> {
+            List<String> uris = new ArrayList<>();
+            try (QueryExecution exec = conneg.query(q)) {
+                ResultSet set = exec.execSelect();
+                while (set.hasNext()) {
+                    QuerySolution solu = set.next();
+                    RDFNode solution = solu.get(uriProp);
+                    uris.add(solution.asResource().getURI());
+                }
+            }
+            return uris;
+        });
+    }
+
     public <T> T executeModel(Function<Model, T> action) {
         T t;
         synchronized (model) {
             t = action.apply(model);
-            try (RDFConnection conneg = RDFConnectionFactory.connect(DATASET_URL)) {
-                conneg.load(model);
-            }
+            acceptConnection(conneg -> conneg.load(model));
             model.removeAll();
         }
         return t;

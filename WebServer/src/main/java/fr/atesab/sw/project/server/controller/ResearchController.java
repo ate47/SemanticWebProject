@@ -1,7 +1,16 @@
 package fr.atesab.sw.project.server.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +27,9 @@ import fr.atesab.sw.project.scraper.territoire.DataTerritoireScraper;
 
 public class ResearchController {
     public static record ApiEndPoint(String message) {
+    };
+
+    public static record RoomAnswer(List<String> rooms) {
     };
 
     @Autowired
@@ -47,16 +59,27 @@ public class ResearchController {
         return scraperManager.executeModel(scraperManager.getTerritoire()::loadTriples);
     }
 
-    @GetMapping("/territoire/rooms")
-    public void RecupRooms() {
-        ParameterizedSparqlString queryStr = new ParameterizedSparqlString();
-        // queryStr.setNsPrefix("sw", "https://territoire.emse.fr/kg/);
-        queryStr.append("SELECT ?etage");
-        queryStr.append("WHERE {");
-        queryStr.append(" ?etage a https://w3id.org/bot#Storey%22");
-        queryStr.append("}");
-        Query q = queryStr.asQuery();
+    @GetMapping("/territoire/floors")
+    public RoomAnswer territoireFloors() {
+        return new RoomAnswer(scraperManager.selectUris("etage", "SELECT ?etage "
+                + "WHERE { "
+                + "?etage a <https://w3id.org/bot#Storey> "
+                + "}"));
+    }
 
+    @GetMapping("/territoire/rooms")
+    public RoomAnswer territoireRooms(
+            @RequestParam("floor") String floor) {
+        return new RoomAnswer(scraperManager.selectUris("room", () -> {
+            ParameterizedSparqlString pss = new ParameterizedSparqlString();
+            pss.append("SELECT ?room ");
+            pss.append("WHERE { ");
+            pss.appendIri(floor);
+            pss.append(" <https://w3id.org/bot#hasSpace> ?room .");
+            pss.append("?room a <https://w3id.org/bot#Space> .");
+            pss.append("}");
+            return pss.asQuery();
+        }));
     }
 
     @GetMapping("/dataterritoire")
