@@ -1,9 +1,9 @@
 <template>
   <div>
     <div v-show="floorLoaded">
-      <div :key="floor" v-for="floor in floorData">
+      <ul :key="floor" v-for="floor in floorData">
         <floor :floor="floor" />
-      </div>
+      </ul>
     </div>
   </div>
 </template>

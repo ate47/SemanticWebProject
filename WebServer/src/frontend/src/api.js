@@ -24,23 +24,45 @@ export default {
 
   /**
    * requests the floors of the main building
-   * @returns {Promise<Array<string>>} the api return value
+   * @returns {Promise<Array<any>>} the api return value
    */
   floors: async function () {
     return axios
-      .get(backendEndpoint + "/territoire/floors")
+      .get(backendEndpoint + "/floors")
       .then((result) => result.data.floors);
   },
 
   /**
    * requests the rooms of a floor
    * @param {string} floor the floor
-   * @returns {Promise<Array<string>>} the api return value
+   * @returns {Promise<Array<any>>} the api return value
    */
   rooms: async function (floor) {
     return axios
-      .get(backendEndpoint + "/territoire/rooms?floor=" + floor)
-      .then((result) => result.data.rooms);
+      .get(backendEndpoint + "/rooms?floor=" + floor)
+      .then((result) => result.data);
+  },
+
+  /**
+   * requests a floor
+   * @param {string} floor the floor
+   * @returns {Promise<any>} the api return value
+   */
+  floor: async function (floor) {
+    return axios
+      .get(backendEndpoint + "/floor?floor=" + floor)
+      .then((result) => result.data.floors);
+  },
+
+  /**
+   * requests a room
+   * @param {string} room the room
+   * @returns {Promise<any>} the api return value
+   */
+  room: async function (room) {
+    return axios
+      .get(backendEndpoint + "/room?room=" + room)
+      .then((result) => result.data);
   },
 
   /**

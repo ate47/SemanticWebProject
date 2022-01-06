@@ -1,15 +1,6 @@
 import { createApp } from "vue";
-import App from "./components/App.vue";
-import Vuelidate from "vuelidate";
+import App from "./App.vue";
+import router from "./router";
+import './assets/tailwind.css'
 
-createApp(App).mount("#app");
-const options = {
-  isEnabled: true,
-  logLevel: "debug",
-  stringifyArguments: false,
-  showLogLevel: true,
-  showMethodName: false,
-  separator: "|",
-  showConsoleColors: true,
-};
-App.use(Vuelidate, options);
+createApp(App).use(router).mount("#app");
