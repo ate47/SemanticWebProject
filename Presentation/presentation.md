@@ -24,7 +24,17 @@ _Antoine Willerval and Yassine Bouziane_
 
 ---
 
-# Program architecture
+# Project objectives
+
+Make a Web application that integrates data from multiple sources.
+
+Define a knowledge model.
+
+Usage of a triple store with the usage of queries.
+
+---
+
+# Web application architecture
 
 ![](data/semweb.png)
 
